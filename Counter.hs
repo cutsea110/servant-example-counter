@@ -1,7 +1,9 @@
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 module Counter where
 
@@ -9,11 +11,13 @@ import Servant
 import Servant.Docs
 import Servant.HTML.Lucid
 import Servant.Server (serve)
+import Servant.Utils.Links
 import Control.Concurrent.STM (atomically)
 import Control.Concurrent.STM.TVar (TVar(..), readTVarIO, modifyTVar, newTVarIO, writeTVar)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Monoid
+import Data.Text (pack)
 import GHC.Generics
 import Lucid
 import Network.Wai (Application)
@@ -44,7 +48,7 @@ instance ToHtml CounterVal where
     <> with form_ [action_ stepUrl, method_ "POST"]
                   (input_ [type_ "submit", value_ "Step!"])
     where
-      stepUrl = "step"
+      stepUrl = pack $ show $ safeLink counterAPI (Proxy :: Proxy StepCounter)
       
   toHtmlRaw = toHtml
 
