@@ -7,19 +7,22 @@ module Counter where
 
 import Servant
 import Servant.Docs
+import Servant.HTML.Lucid
 import Servant.Server (serve)
 import Control.Concurrent.STM (atomically)
 import Control.Concurrent.STM.TVar (TVar(..), readTVarIO, modifyTVar, newTVarIO, writeTVar)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
+import Data.Monoid
 import GHC.Generics
+import Lucid
 import Network.Wai (Application)
 import Network.Wai.Handler.Warp (run)
 
 newtype CounterVal = CounterVal { getCounterVal :: Int }
                      deriving (Show, Num, FromJSON, ToJSON, Generic)
 
-type GetCounter = Get '[JSON] CounterVal
+type GetCounter = Get '[JSON, HTML] CounterVal
 type StepCounter = "step" :> Post '[JSON] ()
 type SetCounter = ReqBody '[JSON] CounterVal :> Put '[JSON] ()
 type Counter = GetCounter :<|> StepCounter :<|> SetCounter
@@ -32,6 +35,18 @@ counterDocs = markdown $ docs counterAPI
 
 instance ToSample CounterVal where
   toSamples _ = [("First access",0),("After 1 step",1),("After 14 steps", 14)]
+
+instance ToHtml CounterVal where
+  toHtml (CounterVal val) =
+    p_ ( toHtml
+       $ "Current value: " ++ show val ++ "."
+       )
+    <> with form_ [action_ stepUrl, method_ "POST"]
+                  (input_ [type_ "submit", value_ "Step!"])
+    where
+      stepUrl = "step"
+      
+  toHtmlRaw = toHtml
 
 handleGetCounter :: TVar CounterVal -> Server GetCounter
 handleGetCounter ctr = liftIO $ readTVarIO ctr
