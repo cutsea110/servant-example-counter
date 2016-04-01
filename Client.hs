@@ -10,15 +10,15 @@ import Counter (counterAPI, CounterVal(..))
 
 type Handler a = ExceptT ServantError IO a
 
-getAPIs :: IO (Handler CounterVal, Handler ())
+getAPIs :: IO (Handler CounterVal, Handler (), CounterVal -> Handler ())
 getAPIs = do
   m <- newManager defaultManagerSettings
-  let get :<|> step = client counterAPI (BaseUrl Http "localhost" 8081 "") m
-  return (get, step)
+  let get :<|> step :<|> set = client counterAPI (BaseUrl Http "localhost" 8081 "") m
+  return (get, step, set)
 
 main :: IO (Either ServantError CounterVal)
 main = do
-  (get, step) <- getAPIs
+  (get, step, set) <- getAPIs
   runExceptT $ do
     n <- get
     liftIO $ print $ getCounterVal n
@@ -26,4 +26,7 @@ main = do
     step
     n' <- get
     liftIO $ print $ getCounterVal n'
-    return n'
+    set $ CounterVal (getCounterVal n' + 10)
+    n'' <- get
+    liftIO $ print $ getCounterVal n''
+    return n''

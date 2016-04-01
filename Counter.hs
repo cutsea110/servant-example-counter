@@ -9,7 +9,7 @@ import Servant
 import Servant.Docs
 import Servant.Server (serve)
 import Control.Concurrent.STM (atomically)
-import Control.Concurrent.STM.TVar (TVar(..), readTVarIO, modifyTVar, newTVarIO)
+import Control.Concurrent.STM.TVar (TVar(..), readTVarIO, modifyTVar, newTVarIO, writeTVar)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import GHC.Generics
@@ -21,7 +21,8 @@ newtype CounterVal = CounterVal { getCounterVal :: Int }
 
 type GetCounter = Get '[JSON] CounterVal
 type StepCounter = "step" :> Post '[JSON] ()
-type Counter = GetCounter :<|> StepCounter
+type SetCounter = ReqBody '[JSON] CounterVal :> Put '[JSON] ()
+type Counter = GetCounter :<|> StepCounter :<|> SetCounter
 
 counterAPI :: Proxy Counter
 counterAPI = Proxy
@@ -35,17 +36,22 @@ instance ToSample CounterVal where
 handleGetCounter :: TVar CounterVal -> Server GetCounter
 handleGetCounter ctr = liftIO $ readTVarIO ctr
 
-handleStepCounyer :: TVar CounterVal -> Server StepCounter
-handleStepCounyer ctr = liftIO $ atomically $ modifyTVar ctr (+1)
+handleStepCounter :: TVar CounterVal -> Server StepCounter
+handleStepCounter ctr = liftIO $ atomically $ modifyTVar ctr (+1)
+
+handleSetCounter :: TVar CounterVal -> Server SetCounter
+handleSetCounter ctr newValue = liftIO $ atomically $ writeTVar ctr newValue
 
 handleCounter :: TVar CounterVal -> Server Counter
 handleCounter ctr = handleGetCounter ctr
-               :<|> handleStepCounyer ctr
+               :<|> handleStepCounter ctr
+               :<|> handleSetCounter ctr
 
 -- | $ cabal exec -- runhaskell Counter.hs
 --   and enter next command other shell prompt.
 --   $ curl -X GET http://localhost:8081
 --   $ curl -X POST http://localhost:8081/step
+--   $ curl -X PUT -H 'Content-Type: application/json' -d '123' http://localhost:8081
 main :: IO ()
 main = do
   initCtr <- newTVarIO 0 :: IO (TVar CounterVal)
