@@ -1,4 +1,4 @@
-module Client where
+module Main where
 
 import Control.Monad.Trans.Except
 import Control.Monad.IO.Class (liftIO)
@@ -16,7 +16,7 @@ getAPIs = do
   let get :<|> step :<|> set = client counterAPI (BaseUrl Http "localhost" 8081 "") m
   return (get, step, set)
 
-main :: IO (Either ServantError CounterVal)
+main :: IO ()
 main = do
   (get, step, set) <- getAPIs
   runExceptT $ do
@@ -30,3 +30,4 @@ main = do
     n'' <- get
     liftIO $ print $ getCounterVal n''
     return n''
+  return ()

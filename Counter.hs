@@ -65,13 +65,3 @@ handleCounter :: TVar CounterVal -> Server Counter
 handleCounter ctr = handleGetCounter ctr
                :<|> handleStepCounter ctr
                :<|> handleSetCounter ctr
-
--- | $ cabal exec -- runhaskell Counter.hs
---   and enter next command other shell prompt.
---   $ curl -X GET http://localhost:8081
---   $ curl -X POST http://localhost:8081/step
---   $ curl -X PUT -H 'Content-Type: application/json' -d '123' http://localhost:8081
-main :: IO ()
-main = do
-  initCtr <- newTVarIO 0 :: IO (TVar CounterVal)
-  run 8081 (serve counterAPI (handleCounter initCtr))
