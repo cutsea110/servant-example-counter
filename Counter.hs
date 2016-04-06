@@ -1,7 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -24,7 +24,7 @@ import Network.Wai (Application)
 import Network.Wai.Handler.Warp (run)
 
 newtype CounterVal = CounterVal { getCounterVal :: Int }
-                     deriving (Show, Num, FromJSON, ToJSON, Generic)
+                     deriving (Show, FromJSON, ToJSON, Generic)
 
 type GetCounter = Get '[JSON, HTML] CounterVal
 type StepCounter = "step" :> Post '[JSON] ()
@@ -36,6 +36,14 @@ counterAPI = Proxy
 -- | >>> putStrLn counterDocs
 counterDocs :: String
 counterDocs = markdown $ docs counterAPI
+
+instance Num CounterVal where
+  CounterVal x + CounterVal y = CounterVal (x + y)
+  CounterVal x * CounterVal y = CounterVal (x * y)
+  abs (CounterVal x) = CounterVal (abs x)
+  signum (CounterVal x) = CounterVal (signum x)
+  fromInteger x = CounterVal (fromInteger x)
+  negate (CounterVal x) = CounterVal (negate x)
 
 instance ToSample CounterVal where
   toSamples _ = [("First access",0),("After 1 step",1),("After 14 steps", 14)]
