@@ -26,10 +26,10 @@ executable server
                      , TypeFamilies
                      , TypeOperators
   build-depends:       base >=4.8 && <4.9
-                     , servant-server >=0.6 && <0.7
-                     , servant-docs >=0.6 && <0.7
-                     , servant-lucid >=0.6 && <0.7
-                     , servant >=0.6 && <0.7
+                     , servant-server >=0.6
+                     , servant-docs >=0.6
+                     , servant-lucid >=0.6
+                     , servant >=0.6
                      , stm >=2.4 && <2.5
                      , transformers >=0.4 && <0.5
                      , aeson >=0.11 && <0.12
@@ -38,7 +38,7 @@ executable server
                      , wai >=3.2 && <3.3
                      , warp >=3.2 && <3.3
                      , http-client >=0.4 && <0.5
-                     , servant-client >=0.6 && <0.7
+                     , servant-client >=0.6
 
 executable client
   main-is:             Client.hs
@@ -50,10 +50,10 @@ executable client
                      , TypeFamilies
                      , TypeOperators
   build-depends:       base >=4.8 && <4.9
-                     , servant-server >=0.6 && <0.7
-                     , servant-docs >=0.6 && <0.7
-                     , servant-lucid >=0.6 && <0.7
-                     , servant >=0.6 && <0.7
+                     , servant-server >=0.6
+                     , servant-docs >=0.6
+                     , servant-lucid >=0.6
+                     , servant >=0.6
                      , stm >=2.4 && <2.5
                      , transformers >=0.4 && <0.5
                      , aeson >=0.11 && <0.12
@@ -62,5 +62,5 @@ executable client
                      , wai >=3.2 && <3.3
                      , warp >=3.2 && <3.3
                      , http-client >=0.4 && <0.5
-                     , servant-client >=0.6 && <0.7
+                     , servant-client >=0.6
 

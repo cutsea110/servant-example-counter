@@ -9,8 +9,6 @@ import Servant.Client
 
 import Counter (counterAPI, CounterVal(..))
 
-type Handler a = ExceptT ServantError IO a
-
 get :: Manager -> BaseUrl -> ClientM CounterVal
 step :: Manager -> BaseUrl -> ClientM ()
 set :: CounterVal -> Manager -> BaseUrl -> ClientM ()
